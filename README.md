@@ -4,6 +4,16 @@ A Node.js and Express REST API for managing books stored in a SQLite database. D
 
 ---
 
+## Live Deployment
+
+The API is deployed and accessible online on **Render**:
+
+- **Render Base URL:** [https://bdf-lab-02-4tfp.onrender.com](https://bdf-lab-02-4tfp.onrender.com)
+- **Sample Test Endpoint (GET Book #1):** [https://bdf-lab-02-4tfp.onrender.com/books/1](https://bdf-lab-02-4tfp.onrender.com/books/1)
+- **Deployment Status:** Active & Online (note: on Render free instances, the initial request may take a few seconds if the service is spinning up from sleep).
+
+---
+
 ## Project Overview
 
 This project implements a RESTful HTTP API with five endpoints that create, read, update, and delete book records. The data is persisted in a local SQLite file (`books.db`). On first startup, the application creates the database file, creates the `book` table, and inserts eight seed records automatically.
@@ -20,7 +30,7 @@ This project implements a RESTful HTTP API with five endpoints that create, read
 
 ## Installation
 
-Open PowerShell inside the `lab-02` directory and install the dependencies:
+Open PowerShell inside the project directory and install the dependencies:
 
 ```powershell
 npm install
@@ -28,7 +38,7 @@ npm install
 
 ---
 
-## Starting the Server
+## Starting the Server Locally
 
 ```powershell
 npm start
@@ -54,7 +64,7 @@ npm start
 | Property | Value |
 | --- | --- |
 | Engine | SQLite 3 (via the `sqlite3` npm package) |
-| File | `lab-02/books.db` (created automatically on first run) |
+| File | `books.db` (created automatically on first run) |
 | Table | `book` |
 
 ### `book` table schema
@@ -120,9 +130,10 @@ Field rules:
 ### GET /books/
 
 **Request**
+```http
+GET https://bdf-lab-02-4tfp.onrender.com/books/
 ```
-GET http://localhost:3000/books/
-```
+*(Local: `GET http://localhost:3000/books/`)*
 
 **Response — 200 OK**
 ```json
@@ -137,9 +148,10 @@ GET http://localhost:3000/books/
 ### GET /books/:bookId/
 
 **Request**
+```http
+GET https://bdf-lab-02-4tfp.onrender.com/books/1/
 ```
-GET http://localhost:3000/books/1/
-```
+*(Local: `GET http://localhost:3000/books/1/`)*
 
 **Response — 200 OK**
 ```json
@@ -151,16 +163,16 @@ GET http://localhost:3000/books/1/
 ### POST /books/
 
 **Request**
-```
-POST http://localhost:3000/books/
+```http
+POST https://bdf-lab-02-4tfp.onrender.com/books/
 Content-Type: application/json
 
-{ "title": "Atomic Habits", "author": "James Clear", "price": 15, "pages": 320 }
+{ "title": "The Psychology of Money", "author": "Morgan Housel", "price": 20, "pages": 250 }
 ```
 
 **Response — 201 Created**
 ```json
-{ "id": 9, "title": "Atomic Habits", "author": "James Clear", "price": 15, "pages": 320 }
+{ "id": 9, "title": "The Psychology of Money", "author": "Morgan Housel", "price": 20, "pages": 250 }
 ```
 
 ---
@@ -168,16 +180,16 @@ Content-Type: application/json
 ### PUT /books/:bookId/
 
 **Request**
-```
-PUT http://localhost:3000/books/9/
+```http
+PUT https://bdf-lab-02-4tfp.onrender.com/books/9/
 Content-Type: application/json
 
-{ "title": "Atomic Habits", "author": "James Clear", "price": 16, "pages": 320 }
+{ "title": "The Psychology of Money", "author": "Morgan Housel", "price": 25, "pages": 250 }
 ```
 
 **Response — 200 OK**
 ```json
-{ "id": 9, "title": "Atomic Habits", "author": "James Clear", "price": 16, "pages": 320 }
+{ "id": 9, "title": "The Psychology of Money", "author": "Morgan Housel", "price": 25, "pages": 250 }
 ```
 
 ---
@@ -185,8 +197,8 @@ Content-Type: application/json
 ### DELETE /books/:bookId/
 
 **Request**
-```
-DELETE http://localhost:3000/books/9/
+```http
+DELETE https://bdf-lab-02-4tfp.onrender.com/books/9/
 ```
 
 **Response — 200 OK**
@@ -209,66 +221,154 @@ DELETE http://localhost:3000/books/9/
 
 ---
 
-## Testing with PowerShell
+## Testing the Deployed API
 
-Start the server first (`npm start`), then open a second PowerShell window.
+The API can be tested online without any local server setup.
 
-### GET all books
+### In the Web Browser
+Open any of the read endpoints directly in your browser:
+- All books: [https://bdf-lab-02-4tfp.onrender.com/books](https://bdf-lab-02-4tfp.onrender.com/books)
+- Single book: [https://bdf-lab-02-4tfp.onrender.com/books/1](https://bdf-lab-02-4tfp.onrender.com/books/1)
+
+### Using PowerShell
+Set the base URL in your PowerShell session:
 ```powershell
-Invoke-RestMethod -Uri 'http://localhost:3000/books/' -Method Get
+$baseUrl = 'https://bdf-lab-02-4tfp.onrender.com'
 ```
 
-### GET one book
-```powershell
-Invoke-RestMethod -Uri 'http://localhost:3000/books/1/' -Method Get
-```
+1. **GET all books:**
+   ```powershell
+   Invoke-RestMethod -Uri "$baseUrl/books/" -Method Get
+   ```
 
-### POST — create a book
+2. **GET a single book:**
+   ```powershell
+   Invoke-RestMethod -Uri "$baseUrl/books/1/" -Method Get
+   ```
+
+3. **POST — Create a new book:**
+   ```powershell
+   $body = @{ title = 'The Psychology of Money'; author = 'Morgan Housel'; price = 20; pages = 250 } | ConvertTo-Json
+   Invoke-RestMethod -Uri "$baseUrl/books/" -Method Post -ContentType 'application/json' -Body $body
+   ```
+
+4. **PUT — Update a book:**
+   ```powershell
+   $body = @{ title = 'The Psychology of Money'; author = 'Morgan Housel'; price = 25; pages = 250 } | ConvertTo-Json
+   Invoke-RestMethod -Uri "$baseUrl/books/9/" -Method Put -ContentType 'application/json' -Body $body
+   ```
+
+5. **DELETE — Remove a book:**
+   ```powershell
+   Invoke-RestMethod -Uri "$baseUrl/books/9/" -Method Delete
+   ```
+
+6. **Test 404 Not Found:**
+   ```powershell
+   try {
+     Invoke-RestMethod -Uri "$baseUrl/books/999/" -Method Get
+   } catch {
+     $_.Exception.Response.StatusCode
+   }
+   ```
+
+7. **Test 400 Invalid ID:**
+   ```powershell
+   try {
+     Invoke-RestMethod -Uri "$baseUrl/books/abc/" -Method Get
+   } catch {
+     $stream = $_.Exception.Response.GetResponseStream()
+     $reader = New-Object System.IO.StreamReader($stream)
+     $reader.ReadToEnd()
+   }
+   ```
+
+8. **Test 400 Invalid Body:**
+   ```powershell
+   try {
+     $bad = '{"title":""}'
+     Invoke-RestMethod -Uri "$baseUrl/books/" -Method Post -ContentType 'application/json' -Body $bad
+   } catch {
+     $stream = $_.Exception.Response.GetResponseStream()
+     $reader = New-Object System.IO.StreamReader($stream)
+     $reader.ReadToEnd()
+   }
+   ```
+
+---
+
+## Testing Locally with PowerShell
+
+To test against your local development server, start the server first (`npm start`), open PowerShell, and run:
+
 ```powershell
+$baseUrl = 'http://localhost:3000'
+
+# GET all books
+Invoke-RestMethod -Uri "$baseUrl/books/" -Method Get
+
+# GET one book
+Invoke-RestMethod -Uri "$baseUrl/books/1/" -Method Get
+
+# POST — create a book
 $body = @{ title = 'Atomic Habits'; author = 'James Clear'; price = 15; pages = 320 } | ConvertTo-Json
-Invoke-RestMethod -Uri 'http://localhost:3000/books/' -Method Post -ContentType 'application/json' -Body $body
-```
+Invoke-RestMethod -Uri "$baseUrl/books/" -Method Post -ContentType 'application/json' -Body $body
 
-### PUT — update a book
-```powershell
+# PUT — update a book
 $body = @{ title = 'Atomic Habits'; author = 'James Clear'; price = 16; pages = 320 } | ConvertTo-Json
-Invoke-RestMethod -Uri 'http://localhost:3000/books/9/' -Method Put -ContentType 'application/json' -Body $body
-```
+Invoke-RestMethod -Uri "$baseUrl/books/9/" -Method Put -ContentType 'application/json' -Body $body
 
-### DELETE — delete a book
-```powershell
-Invoke-RestMethod -Uri 'http://localhost:3000/books/9/' -Method Delete
-```
-
-### Error — book not found (404)
-```powershell
-Invoke-RestMethod -Uri 'http://localhost:3000/books/999/' -Method Get
-```
-
-### Error — invalid ID (400)
-```powershell
-Invoke-RestMethod -Uri 'http://localhost:3000/books/abc/' -Method Get
-```
-
-### Error — missing fields (400)
-```powershell
-$bad = '{"title":""}'
-Invoke-RestMethod -Uri 'http://localhost:3000/books/' -Method Post -ContentType 'application/json' -Body $bad
+# DELETE — delete a book
+Invoke-RestMethod -Uri "$baseUrl/books/9/" -Method Delete
 ```
 
 ---
 
-## Screenshots Required for Submission
+## Screenshots
 
-Capture the following screenshots and save them in the `screenshots/` folder:
+The following screenshots document the functionality of the API:
 
-1. **`01_get_all_books.png`** — PowerShell output of `GET /books/` showing all 8 seed books.
-2. **`02_get_one_book.png`** — PowerShell output of `GET /books/1/` showing The Hobbit.
-3. **`03_post_create_book.png`** — PowerShell output of `POST /books/` showing the new book with its assigned `id`.
-4. **`04_put_update_book.png`** — PowerShell output of `PUT /books/:id/` showing the updated `price` field.
-5. **`05_delete_book.png`** — PowerShell output of `DELETE /books/:id/` showing `Book deleted successfully`.
-6. **`06_error_404_not_found.png`** — Error response for `GET /books/999/` (404 Book not found).
-7. **`07_error_400_invalid_id.png`** — Error response for `GET /books/abc/` (400 bookId must be a positive integer).
-8. **`08_error_400_invalid_body.png`** — Error response for `POST /books/` with an invalid/empty body (400 validation error).
-9. **`09_server_startup.png`** — Terminal showing `Server is running at http://localhost:3000`.
-10. **`10_database_table.png`** *(optional but recommended)* — A DB browser or SQLite query showing the `book` table schema and data.
+### 1. GET All Books
+![GET all books](screenshots/01_get_all_books.png)
+
+### 2. GET One Book by ID
+![GET one book](screenshots/02_get_one_book.png)
+
+### 3. POST Create Book
+![POST create book](screenshots/03_post_create_book.png)
+
+### 4. PUT Update Book
+![PUT update book](screenshots/04_put_update_book.png)
+
+### 5. DELETE Book
+![DELETE book](screenshots/05_delete_book.png)
+
+### 6. Error 404 Not Found
+![Error 404 not found](screenshots/06_error_404_not_found.png)
+
+### 7. Error 400 Invalid ID
+![Error 400 invalid ID](screenshots/07_error_400_invalid_id.png)
+
+### 8. Error 400 Invalid Body
+![Error 400 invalid body](screenshots/08_error_400_invalid_body.png)
+
+### 9. Server Startup
+![Server startup](screenshots/09_server_startup.png)
+
+### 10. Database Table & Records
+![Database table](screenshots/10_database_table.png)
+
+---
+
+## Submission Checklist
+
+- [x] `01_get_all_books.png` — Browser/PowerShell output of `GET /books/`
+- [x] `02_get_one_book.png` — Browser/PowerShell output of `GET /books/1/`
+- [x] `03_post_create_book.png` — PowerShell output of `POST /books/`
+- [x] `04_put_update_book.png` — PowerShell output of `PUT /books/:id/`
+- [x] `05_delete_book.png` — PowerShell output of `DELETE /books/:id/`
+- [x] `06_error_404_not_found.png` — Error response for non-existent book (404)
+- [x] `07_error_400_invalid_id.png` — Error response for invalid ID (400)
+- [x] `08_error_400_invalid_body.png` — Error response for invalid body (400)
+- [x] `09_server_startup.png` — Terminal showing `Server is running at http://localhost:3000`
+- [x] `10_database_table.png` — Query output displaying `book` table schema and seed rows
